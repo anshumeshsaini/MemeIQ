@@ -19,12 +19,15 @@ interface AnalysisResult {
   }[];
 }
 
+const API_URL = 'https://api.memealyzer.com/analyze'; // This is a fictional API endpoint
+
 const ResultsPage = () => {
   const location = useLocation();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,60 +41,64 @@ const ResultsPage = () => {
   const analyzeImage = async (url: string) => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
+    setError(null);
     
     // Define progressInterval outside the try block so it's accessible in the catch block
     let progressInterval: NodeJS.Timeout;
     
     try {
-      // Simulate progressive loading for better UX
+      // Start progress animation
       progressInterval = setInterval(() => {
         setAnalysisProgress(prev => {
           const newProgress = prev + Math.random() * 15;
-          return newProgress >= 100 ? 100 : newProgress;
+          return newProgress >= 90 ? 90 : newProgress; // Only go up to 90% with animation
         });
       }, 700);
 
-      // In a real app, this would be an API call to an image analysis service
-      // For demo purposes, we'll simulate an API response
-      setTimeout(() => {
-        clearInterval(progressInterval);
-        setAnalysisProgress(100);
-        
-        // Mock result data
-        const mockResult: AnalysisResult = {
-          origin: "4chan /b/ board, circa 2019",
-          template: "Distracted Boyfriend",
-          popularity: 85,
-          firstSeen: "June 15, 2019",
-          tags: ["reaction", "relationship", "jealousy", "humor"],
-          similarMemes: [
-            {
-              url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-              similarity: 92
-            },
-            {
-              url: "https://images.unsplash.com/photo-1518770660439-4636190af475",
-              similarity: 84
-            },
-            {
-              url: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
-              similarity: 78
-            }
-          ]
-        };
-        
-        setResult(mockResult);
-        setIsAnalyzing(false);
-        
-        toast({
-          title: "Analysis Complete",
-          description: "We've found information about your meme!",
-          duration: 3000,
-        });
-      }, 3500);
-    } catch (error) {
+      // In a real app, we'd send the image to an API
+      // For this demo, we'll simulate an API call but structure it like a real one
+      
+      // Simulate API call with fetch
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageUrl: url }),
+      }).catch(err => {
+        // Simulate API error - in real app, this would be caught differently
+        console.error("API call failed:", err);
+        throw new Error("API request failed");
+      });
+      
+      // Since we're simulating, we'll create a timeout to mimic API response time
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      
+      // Clear interval before setting 100% progress
+      clearInterval(progressInterval);
+      setAnalysisProgress(100);
+      
+      // In real implementation, we would parse the API response
+      // For this demo, we'll use our template data but pretend it came from API
+      
+      // Get meme details - this would normally come from API response.json()
+      const memeDatabase = getMemeDatabase();
+      const analyzedMeme = memeDatabase.find(meme => 
+        meme.template === "Distracted Boyfriend" || Math.random() > 0.7
+      ) || memeDatabase[0];
+      
+      setResult(analyzedMeme);
+      setIsAnalyzing(false);
+      
+      toast({
+        title: "Analysis Complete",
+        description: "We've found information about your meme!",
+        duration: 3000,
+      });
+    } catch (err) {
       clearInterval(progressInterval);
       setIsAnalyzing(false);
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
       toast({
         title: "Analysis Failed",
         description: "Unable to analyze the image. Please try again.",
@@ -99,6 +106,84 @@ const ResultsPage = () => {
         duration: 5000,
       });
     }
+  };
+
+  // This function simulates a database of known memes
+  const getMemeDatabase = (): AnalysisResult[] => {
+    return [
+      {
+        origin: "4chan /b/ board, circa 2019",
+        template: "Distracted Boyfriend",
+        popularity: 85,
+        firstSeen: "June 15, 2019",
+        tags: ["reaction", "relationship", "jealousy", "humor"],
+        similarMemes: [
+          {
+            url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+            similarity: 92
+          },
+          {
+            url: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+            similarity: 84
+          },
+          {
+            url: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
+            similarity: 78
+          }
+        ]
+      },
+      {
+        origin: "Reddit r/memes, August 2021",
+        template: "Drake Hotline Bling",
+        popularity: 92,
+        firstSeen: "August 3, 2021",
+        tags: ["reaction", "comparison", "preference", "viral"],
+        similarMemes: [
+          {
+            url: "https://images.unsplash.com/photo-1531297484001-80022131f5a1",
+            similarity: 88
+          },
+          {
+            url: "https://images.unsplash.com/photo-1587620962725-abab7fe55159",
+            similarity: 81
+          }
+        ]
+      },
+      {
+        origin: "Twitter, December 2020",
+        template: "Woman Yelling at Cat",
+        popularity: 89,
+        firstSeen: "December 19, 2020",
+        tags: ["argument", "funny", "animals", "conflict"],
+        similarMemes: [
+          {
+            url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c",
+            similarity: 95
+          },
+          {
+            url: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
+            similarity: 79
+          }
+        ]
+      },
+      {
+        origin: "Instagram, March 2022",
+        template: "Two Buttons",
+        popularity: 77,
+        firstSeen: "March 5, 2022",
+        tags: ["decision", "dilemma", "choice", "sweat"],
+        similarMemes: [
+          {
+            url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f",
+            similarity: 86
+          },
+          {
+            url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97",
+            similarity: 75
+          }
+        ]
+      }
+    ];
   };
 
   return (
@@ -129,6 +214,20 @@ const ResultsPage = () => {
                 </p>
               </div>
             </div>
+          </div>
+        ) : error ? (
+          <div className="glass-card p-8 max-w-3xl mx-auto text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Analysis Failed</h2>
+            <p className="text-foreground/70 mb-4">
+              {error}
+            </p>
+            <button 
+              className="meme-btn" 
+              onClick={() => imageUrl && analyzeImage(imageUrl)}
+            >
+              Try Again
+            </button>
           </div>
         ) : result ? (
           <div className="max-w-4xl mx-auto">
