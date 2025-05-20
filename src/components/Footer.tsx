@@ -93,9 +93,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-white/5 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-foreground/60 mb-4 md:mb-0">
-            &copy; 2025 MemeIQ. All rights reserved.
-          </p>
+          
           <div className="flex items-center">
             <a href="#" className="text-foreground/60 hover:text-meme-purple transition-colors text-sm inline-flex items-center mr-6">
               Status <span className="ml-2 w-2 h-2 bg-green-400 rounded-full"></span>

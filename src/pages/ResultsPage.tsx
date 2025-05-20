@@ -1,6 +1,7 @@
-
 import { useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import * as tf from '@tensorflow/tfjs';
+import * as mobilenet from '@tensorflow-models/mobilenet';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useToast } from '@/components/ui/use-toast';
@@ -8,42 +9,86 @@ import { Progress } from "@/components/ui/progress";
 import { Loader2, AlertCircle, CheckCircle2, FileQuestion } from 'lucide-react';
 
 interface AnalysisResult {
-  origin?: string;
-  template?: string;
-  popularity?: number;
-  firstSeen?: string;
-  tags?: string[];
+  predictions?: {
+    className: string;
+    probability: number;
+  }[];
   similarMemes?: {
     url: string;
     similarity: number;
   }[];
 }
 
-const API_URL = 'https://api.memealyzer.com/analyze'; // This is a fictional API endpoint
+const MEME_TAGS = [
+  "funny", "meme", "humor", "viral", "reaction", "dank", "wholesome",
+  "sarcastic", "satire", "edgy", "template", "caption", "image macro"
+];
+
+const SIMILAR_MEMES = [
+  "https://i.imgflip.com/1bij.jpg", // One Does Not Simply
+  "https://i.imgflip.com/1bgw.jpg", // Distracted Boyfriend
+  "https://i.imgflip.com/1bh8.jpg", // Drake Hotline Bling
+  "https://i.imgflip.com/1bhf.jpg", // Two Buttons
+  "https://i.imgflip.com/1bh3.jpg", // Bateman
+  "https://i.imgflip.com/1bip.jpg", // X All The Y
+  "https://i.imgflip.com/1bhw.jpg", // Futurama Fry
+  "https://i.imgflip.com/1b42.jpg", // Y U No
+  "https://i.imgflip.com/9vct.jpg"  // Woman Yelling at Cat
+];
 
 const ResultsPage = () => {
   const location = useLocation();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const modelRef = useRef<mobilenet.MobileNet | null>(null);
   const { toast } = useToast();
 
+  // Load TensorFlow model on component mount
   useEffect(() => {
-    // Get image from state passed by SearchUpload component
-    if (location.state?.imageUrl) {
+    const loadModel = async () => {
+      setIsModelLoading(true);
+      try {
+        await tf.ready();
+        modelRef.current = await mobilenet.load();
+        setIsModelLoading(false);
+      } catch (err) {
+        console.error("Failed to load model:", err);
+        setIsModelLoading(false);
+        setError("Failed to load AI model");
+      }
+    };
+
+    loadModel();
+
+    return () => {
+      // Cleanup TensorFlow memory
+      if (modelRef.current) {
+        tf.disposeVariables();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.imageUrl && modelRef.current && !isModelLoading) {
       setImageUrl(location.state.imageUrl);
       analyzeImage(location.state.imageUrl);
     }
-  }, [location.state]);
+  }, [location.state, isModelLoading]);
 
   const analyzeImage = async (url: string) => {
+    if (!modelRef.current) {
+      setError("AI model not loaded");
+      return;
+    }
+
     setIsAnalyzing(true);
     setAnalysisProgress(0);
     setError(null);
     
-    // Define progressInterval outside the try block so it's accessible in the catch block
     let progressInterval: NodeJS.Timeout;
     
     try {
@@ -51,48 +96,67 @@ const ResultsPage = () => {
       progressInterval = setInterval(() => {
         setAnalysisProgress(prev => {
           const newProgress = prev + Math.random() * 15;
-          return newProgress >= 90 ? 90 : newProgress; // Only go up to 90% with animation
+          return newProgress >= 90 ? 90 : newProgress;
         });
       }, 700);
 
-      // In a real app, we'd send the image to an API
-      // For this demo, we'll simulate an API call but structure it like a real one
-      
-      // Simulate API call with fetch
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ imageUrl: url }),
-      }).catch(err => {
-        // Simulate API error - in real app, this would be caught differently
-        console.error("API call failed:", err);
-        throw new Error("API request failed");
+      // Load the image
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = url;
+
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error("Failed to load image"));
       });
-      
-      // Since we're simulating, we'll create a timeout to mimic API response time
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      
+
+      // Classify the image using MobileNet
+      setAnalysisProgress(30);
+      const predictions = await modelRef.current.classify(img);
+      setAnalysisProgress(70);
+
+      // Generate similar memes (mock implementation)
+      const similarMemes = SIMILAR_MEMES
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3)
+        .map(url => ({
+          url,
+          similarity: Math.floor(70 + Math.random() * 30)
+        }));
+
+      // Generate tags based on predictions
+      const relevantTags = predictions
+        .filter(p => p.probability > 0.1)
+        .flatMap(p => {
+          const words = p.className.toLowerCase().split(/[, ]+/);
+          return words.filter(word => 
+            word.length > 3 && MEME_TAGS.includes(word)
+          );
+        })
+        .filter((tag, index, self) => self.indexOf(tag) === index)
+        .slice(0, 5);
+
+      // If no relevant tags found, use default tags
+      const tags = relevantTags.length > 0 ? relevantTags : 
+        ["meme", "humor", ...MEME_TAGS.sort(() => 0.5 - Math.random()).slice(0, 2)];
+
       // Clear interval before setting 100% progress
       clearInterval(progressInterval);
       setAnalysisProgress(100);
-      
-      // In real implementation, we would parse the API response
-      // For this demo, we'll use our template data but pretend it came from API
-      
-      // Get meme details - this would normally come from API response.json()
-      const memeDatabase = getMemeDatabase();
-      const analyzedMeme = memeDatabase.find(meme => 
-        meme.template === "Distracted Boyfriend" || Math.random() > 0.7
-      ) || memeDatabase[0];
+
+      // Prepare the result
+      const analyzedMeme: AnalysisResult = {
+        predictions: predictions.slice(0, 3), // Top 3 predictions
+        similarMemes,
+        tags
+      };
       
       setResult(analyzedMeme);
       setIsAnalyzing(false);
       
       toast({
         title: "Analysis Complete",
-        description: "We've found information about your meme!",
+        description: "We've analyzed your meme!",
         duration: 3000,
       });
     } catch (err) {
@@ -108,84 +172,6 @@ const ResultsPage = () => {
     }
   };
 
-  // This function simulates a database of known memes
-  const getMemeDatabase = (): AnalysisResult[] => {
-    return [
-      {
-        origin: "4chan /b/ board, circa 2019",
-        template: "Distracted Boyfriend",
-        popularity: 85,
-        firstSeen: "June 15, 2019",
-        tags: ["reaction", "relationship", "jealousy", "humor"],
-        similarMemes: [
-          {
-            url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-            similarity: 92
-          },
-          {
-            url: "https://images.unsplash.com/photo-1518770660439-4636190af475",
-            similarity: 84
-          },
-          {
-            url: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
-            similarity: 78
-          }
-        ]
-      },
-      {
-        origin: "Reddit r/memes, August 2021",
-        template: "Drake Hotline Bling",
-        popularity: 92,
-        firstSeen: "August 3, 2021",
-        tags: ["reaction", "comparison", "preference", "viral"],
-        similarMemes: [
-          {
-            url: "https://images.unsplash.com/photo-1531297484001-80022131f5a1",
-            similarity: 88
-          },
-          {
-            url: "https://images.unsplash.com/photo-1587620962725-abab7fe55159",
-            similarity: 81
-          }
-        ]
-      },
-      {
-        origin: "Twitter, December 2020",
-        template: "Woman Yelling at Cat",
-        popularity: 89,
-        firstSeen: "December 19, 2020",
-        tags: ["argument", "funny", "animals", "conflict"],
-        similarMemes: [
-          {
-            url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c",
-            similarity: 95
-          },
-          {
-            url: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
-            similarity: 79
-          }
-        ]
-      },
-      {
-        origin: "Instagram, March 2022",
-        template: "Two Buttons",
-        popularity: 77,
-        firstSeen: "March 5, 2022",
-        tags: ["decision", "dilemma", "choice", "sweat"],
-        similarMemes: [
-          {
-            url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f",
-            similarity: 86
-          },
-          {
-            url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97",
-            similarity: 75
-          }
-        ]
-      }
-    ];
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -199,7 +185,15 @@ const ResultsPage = () => {
           </p>
         </div>
 
-        {isAnalyzing ? (
+        {isModelLoading ? (
+          <div className="glass-card p-8 max-w-3xl mx-auto text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-meme-purple mx-auto" />
+            <h2 className="text-xl font-semibold mt-4">Loading AI Model...</h2>
+            <p className="text-foreground/70 mt-2">
+              This may take a moment. Please wait while we load the image recognition model.
+            </p>
+          </div>
+        ) : isAnalyzing ? (
           <div className="glass-card p-8 max-w-3xl mx-auto">
             <div className="text-center space-y-6">
               <Loader2 className="h-12 w-12 animate-spin text-meme-purple mx-auto" />
@@ -207,10 +201,9 @@ const ResultsPage = () => {
               <div className="space-y-2">
                 <Progress value={analysisProgress} className="h-2" />
                 <p className="text-sm text-foreground/70">
-                  {analysisProgress < 30 && "Identifying meme template..."}
-                  {analysisProgress >= 30 && analysisProgress < 60 && "Searching for origin..."}
-                  {analysisProgress >= 60 && analysisProgress < 90 && "Analyzing virality and spread..."}
-                  {analysisProgress >= 90 && "Finalizing results..."}
+                  {analysisProgress < 30 && "Loading image..."}
+                  {analysisProgress >= 30 && analysisProgress < 70 && "Identifying meme content..."}
+                  {analysisProgress >= 70 && "Finalizing results..."}
                 </p>
               </div>
             </div>
@@ -249,41 +242,37 @@ const ResultsPage = () => {
                 <div className="glass-card p-6">
                   <h2 className="text-xl font-semibold mb-4 flex items-center">
                     <FileQuestion className="mr-2 h-5 w-5 text-meme-blue" />
-                    Meme Origin
+                    AI Predictions
                   </h2>
                   <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-foreground/70">Template:</span>
-                      <span className="font-medium">{result.template}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-foreground/70">First Seen:</span>
-                      <span className="font-medium">{result.firstSeen}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-foreground/70">Origin:</span>
-                      <span className="font-medium">{result.origin}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-foreground/70">Popularity Score:</span>
-                      <span className="font-medium">{result.popularity}/100</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="glass-card p-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center">
-                    <CheckCircle2 className="mr-2 h-5 w-5 text-meme-blue" />
-                    Tags
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {result.tags?.map((tag, index) => (
-                      <span key={index} className="px-3 py-1 bg-secondary/40 rounded-full text-sm">
-                        {tag}
-                      </span>
+                    {result.predictions?.map((pred, index) => (
+                      <div key={index} className="flex justify-between">
+                        <span className="text-foreground/70">
+                          {pred.className.replace(/,/g, ", ")}:
+                        </span>
+                        <span className="font-medium">
+                          {(pred.probability * 100).toFixed(1)}%
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </div>
+
+                {result.tags && (
+                  <div className="glass-card p-6">
+                    <h2 className="text-xl font-semibold mb-4 flex items-center">
+                      <CheckCircle2 className="mr-2 h-5 w-5 text-meme-blue" />
+                      Tags
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {result.tags.map((tag, index) => (
+                        <span key={index} className="px-3 py-1 bg-secondary/40 rounded-full text-sm">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -297,6 +286,10 @@ const ResultsPage = () => {
                         src={meme.url} 
                         alt={`Similar meme ${index + 1}`} 
                         className="w-full h-48 object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "https://i.imgflip.com/1bij.jpg"; // Fallback image
+                        }}
                       />
                       <div className="p-3">
                         <div className="text-sm text-foreground/70">
