@@ -1,14 +1,19 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Search, BarChart2, Upload, Database, Zap } from 'lucide-react';
+import { Menu, X, Search, BarChart2 } from 'lucide-react';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleUploadClick = () => {
+    navigate('/search');
   };
 
   return (
@@ -38,7 +43,7 @@ const Navbar = () => {
             <Link to="/about" className="text-foreground/80 hover:text-foreground transition-colors">
               About
             </Link>
-            <Button variant="default" className="meme-btn">
+            <Button variant="default" className="meme-btn" onClick={handleUploadClick}>
               Upload Meme
             </Button>
           </div>
@@ -88,7 +93,10 @@ const Navbar = () => {
               About
             </Link>
             <div className="px-3 py-2">
-              <Button variant="default" className="meme-btn w-full">
+              <Button variant="default" className="meme-btn w-full" onClick={() => {
+                handleUploadClick();
+                toggleMenu();
+              }}>
                 Upload Meme
               </Button>
             </div>

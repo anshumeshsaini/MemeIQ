@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Upload, AlertCircle, Image, FileImage } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,7 @@ const SearchUpload = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -74,16 +76,8 @@ const SearchUpload = () => {
     
     setIsLoading(true);
     
-    // Simulate API call for demo
-    setTimeout(() => {
-      toast({
-        title: "Analysis Complete",
-        description: "Redirecting to results page",
-      });
-      
-      // In a real app, you would redirect to the results page or display results
-      setIsLoading(false);
-    }, 2000);
+    // Navigate to results page with the image URL
+    navigate('/results', { state: { imageUrl: uploadedImage } });
   };
 
   const clearImage = () => {
