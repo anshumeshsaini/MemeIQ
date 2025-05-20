@@ -39,9 +39,12 @@ const ResultsPage = () => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
     
+    // Define progressInterval outside the try block so it's accessible in the catch block
+    let progressInterval: NodeJS.Timeout;
+    
     try {
       // Simulate progressive loading for better UX
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setAnalysisProgress(prev => {
           const newProgress = prev + Math.random() * 15;
           return newProgress >= 100 ? 100 : newProgress;
