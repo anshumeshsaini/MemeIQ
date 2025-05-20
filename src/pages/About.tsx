@@ -1,4 +1,3 @@
-
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -87,10 +86,13 @@ const About = () => {
                     <Code className="h-4 w-4 mr-2" />
                     API Documentation
                   </Button>
-                  <Button variant="outline" className="border-meme-purple/30">
+                  <a 
+                    href="mailto:anshumesh.saini@gmail.com" 
+                    className="meme-btn flex items-center"
+                  >
                     Get API Key
                     <ArrowUpRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  </a>
                 </div>
               </div>
               
@@ -115,10 +117,10 @@ const About = () => {
             </p>
             
             <div className="flex justify-center">
-              <Button className="meme-btn">
+              <a href="mailto:anshumesh.saini@gmail.com" className="meme-btn flex items-center">
                 Get in Touch
                 <ArrowUpRight className="h-4 w-4 ml-2" />
-              </Button>
+              </a>
             </div>
           </div>
         </div>

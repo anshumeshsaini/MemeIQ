@@ -1,73 +1,139 @@
-# Welcome to your Lovable project
+# **Meme Reverse Image Search Engine** 🚀
 
-## Project info
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
 
-**URL**: https://lovable.dev/projects/e0eb0920-6db5-494d-a388-5cfb6f9a80cb
+A modern web application that helps you trace meme origins, find variations, and analyze viral trends using AI-powered reverse image search.
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+- **React + Vite** frontend with TypeScript
+- **TensorFlow.js** for client-side image analysis
+- **Google Vision API** integration for reverse search
+- **Meme template recognition** using custom models
+- **Responsive UI** with modern design
+- **Type-safe** codebase
 
-**Use Lovable**
+## 🛠 Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e0eb0920-6db5-494d-a388-5cfb6f9a80cb) and start prompting.
+**Frontend:**
+- React 18
+- Vite
+- TypeScript
+- TensorFlow.js
+- Tailwind CSS (or your preferred CSS solution)
 
-Changes made via Lovable will be committed automatically to this repo.
+**Backend (optional):**
+- Node.js/Express or FastAPI
+- Google Vision API
+- Know Your Meme API
 
-**Use your preferred IDE**
+## � Quick Start
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
+- Node.js (v16+ recommended)
+- Yarn or npm
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Installation
 
-Follow these steps:
+1. Clone the repository:
+```bash
+git https://github.com/anshumeshsaini/MeneIQ.git
+cd viral-meme-oracle
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. Install dependencies:
+```bash
+yarn install
+# or
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. Set up environment variables:
+Create a `.env` file in the root directory:
+```env
+VITE_GOOGLE_API_KEY=your_api_key
+VITE_MEME_API_KEY=your_meme_api_key
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Run the development server:
+```bash
+yarn dev
+# or
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🏗 Project Structure
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+src/
+├── assets/              # Static assets
+├── components/          # Reusable components
+│   ├── ImageUpload.tsx
+│   ├── ResultsView.tsx
+│   └── ...
+├── hooks/               # Custom hooks
+│   ├── useImageSearch.ts
+│   └── ...
+├── models/              # TensorFlow models
+│   ├── memeModel.ts
+│   └── ...
+├── pages/               # Page components
+│   ├── Home.tsx
+│   └── ...
+├── services/            # API services
+│   ├── googleVision.ts
+│   └── ...
+├── types/               # Type definitions
+│   ├── meme.d.ts
+│   └── ...
+├── utils/               # Utility functions
+│   ├── imageUtils.ts
+│   └── ...
+├── App.tsx
+└── main.tsx
+```
 
-**Use GitHub Codespaces**
+## 🔍 How It Works
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. User uploads an image through the React interface
+2. The app uses TensorFlow.js to analyze the image client-side
+3. For more advanced search, the image is sent to Google Vision API
+4. Results are displayed with:
+   - Original source (if found)
+   - Similar memes
+   - Viral trend data
+   - Template recognition
 
-## What technologies are used for this project?
+## 🚀 Deployment
 
-This project is built with:
+Build for production:
+```bash
+yarn build
+# or
+npm run build
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Deploy to your preferred platform (Vercel, Netlify, etc.)
 
-## How can I deploy this project?
+## 📈 Future Improvements
 
-Simply open [Lovable](https://lovable.dev/projects/e0eb0920-6db5-494d-a388-5cfb6f9a80cb) and click on Share -> Publish.
+- [ ] Add WebAssembly support for faster TensorFlow.js performance
+- [ ] Implement real-time meme tracking
+- [ ] Add browser extension version
+- [ ] Social media sharing integration
 
-## Can I connect a custom domain to my Lovable project?
+## 🤝 Contributing
 
-Yes, you can!
+Contributions are welcome! Please open an issue first to discuss what you'd like to change.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📜 License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+MIT
+
+---
+
+**Made with React, Vite, and Meme Magic** ✨
+
