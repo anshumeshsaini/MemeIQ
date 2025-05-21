@@ -17,6 +17,7 @@ interface AnalysisResult {
     url: string;
     similarity: number;
   }[];
+  tags?: string[]; // Add the tags property to fix the type errors
 }
 
 const MEME_TAGS = [
@@ -89,6 +90,7 @@ const ResultsPage = () => {
     setAnalysisProgress(0);
     setError(null);
     
+    // Declare progressInterval outside try/catch so it's accessible in the catch block
     let progressInterval: NodeJS.Timeout;
     
     try {

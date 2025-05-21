@@ -13,7 +13,7 @@ import {
   AlignLeft, 
   AlignCenter, 
   AlignRight, 
-  ColorPicker,
+  Palette,
   Trash,
   Text
 } from 'lucide-react';
@@ -216,7 +216,7 @@ const MemeEditor = ({
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button size="sm" variant="outline" style={{ backgroundColor: textElement.color }}>
-                            <ColorPicker className="h-4 w-4" />
+                            <Palette className="h-4 w-4" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-60">

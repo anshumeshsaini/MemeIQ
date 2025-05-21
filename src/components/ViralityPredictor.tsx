@@ -1,6 +1,5 @@
-
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Share, TrendingUp, Download, CheckCircle, AlertCircle, Hashtag } from 'lucide-react';
+import { ArrowLeft, Share, TrendingUp, Download, CheckCircle, AlertCircle, Hash } from 'lucide-react';
 
 interface ViralityPredictorProps {
   viralityScore: number;
@@ -119,7 +118,7 @@ const ViralityPredictor = ({
 
             <div className="bg-secondary/20 rounded-lg p-4 border border-border">
               <h3 className="text-lg font-medium mb-3 flex items-center">
-                <Hashtag className="mr-2 h-4 w-4 text-meme-blue" />
+                <Hash className="mr-2 h-4 w-4 text-meme-blue" />
                 Suggested Hashtags
               </h3>
               <div className="flex flex-wrap gap-2">
