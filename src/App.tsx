@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import ResultsPage from "./pages/ResultsPage";
+import MemeCreator from "./pages/MemeCreator";
 import Trends from "./pages/Trends";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/search" element={<Search />} />
           <Route path="/results" element={<ResultsPage />} />
+          <Route path="/creator" element={<MemeCreator />} />
           <Route path="/trends" element={<Trends />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

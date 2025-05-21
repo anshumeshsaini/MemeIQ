@@ -1,0 +1,161 @@
+
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Share, TrendingUp, Download, CheckCircle, AlertCircle, Hashtag } from 'lucide-react';
+
+interface ViralityPredictorProps {
+  viralityScore: number;
+  viralityData: {
+    score: number;
+    strengths: string[];
+    weaknesses: string[];
+    suggestedHashtags: string[];
+    similarMemes: string[];
+    templateInfo?: {
+      name: string;
+      firstSeen: string;
+      origin: string;
+      popularityScore: string;
+    };
+  };
+  onBackToEditor: () => void;
+}
+
+const ViralityPredictor = ({
+  viralityScore,
+  viralityData,
+  onBackToEditor
+}: ViralityPredictorProps) => {
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-500';
+    if (score >= 60) return 'text-yellow-500';
+    return 'text-red-500';
+  };
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 80) return 'Excellent viral potential!';
+    if (score >= 60) return 'Good viral potential';
+    if (score >= 40) return 'Average viral potential';
+    return 'Low viral potential';
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="glass-card p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold flex items-center">
+            <TrendingUp className="mr-2 h-6 w-6 text-meme-purple" />
+            Virality Prediction
+          </h2>
+          <Button variant="outline" onClick={onBackToEditor}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Editor
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-1">
+            <div className="bg-secondary/30 rounded-lg p-6 text-center">
+              <div className="text-6xl font-bold mb-2 bg-gradient-meme text-transparent bg-clip-text">
+                {viralityScore}<span className="text-3xl">/100</span>
+              </div>
+              <div className={`text-xl font-medium ${getScoreColor(viralityScore)}`}>
+                {getScoreLabel(viralityScore)}
+              </div>
+              <p className="mt-4 text-foreground/70">
+                This score predicts how likely your meme is to go viral based on current trends and meme patterns.
+              </p>
+              <div className="mt-6 flex justify-center space-x-3">
+                <Button variant="outline" className="flex-1">
+                  <Share className="h-4 w-4 mr-2" /> Share
+                </Button>
+                <Button className="meme-btn flex-1">
+                  <Download className="h-4 w-4 mr-2" /> Download
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-2 space-y-4">
+            {viralityData.templateInfo && (
+              <div className="bg-secondary/20 rounded-lg p-4 border border-border">
+                <h3 className="text-lg font-medium mb-3">Meme Origin</h3>
+                <div className="grid grid-cols-2 gap-y-2 text-sm">
+                  <div className="text-foreground/70">Template:</div>
+                  <div className="font-medium">{viralityData.templateInfo.name}</div>
+                  <div className="text-foreground/70">First Seen:</div>
+                  <div>{viralityData.templateInfo.firstSeen}</div>
+                  <div className="text-foreground/70">Origin:</div>
+                  <div>{viralityData.templateInfo.origin}</div>
+                  <div className="text-foreground/70">Popularity Score:</div>
+                  <div>{viralityData.templateInfo.popularityScore}</div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex space-x-4">
+              <div className="flex-1 bg-secondary/20 rounded-lg p-4 border border-border">
+                <h3 className="text-lg font-medium mb-2 flex items-center">
+                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                  Strengths
+                </h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  {viralityData.strengths.map((strength, index) => (
+                    <li key={index} className="text-sm">{strength}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex-1 bg-secondary/20 rounded-lg p-4 border border-border">
+                <h3 className="text-lg font-medium mb-2 flex items-center">
+                  <AlertCircle className="mr-2 h-4 w-4 text-yellow-500" />
+                  Areas to Improve
+                </h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  {viralityData.weaknesses.map((weakness, index) => (
+                    <li key={index} className="text-sm">{weakness}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="bg-secondary/20 rounded-lg p-4 border border-border">
+              <h3 className="text-lg font-medium mb-3 flex items-center">
+                <Hashtag className="mr-2 h-4 w-4 text-meme-blue" />
+                Suggested Hashtags
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {viralityData.suggestedHashtags.map((hashtag, index) => (
+                  <span key={index} className="px-3 py-1 bg-meme-purple/20 text-meme-purple rounded-full text-sm">
+                    {hashtag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {viralityData.similarMemes.length > 0 && (
+        <div className="glass-card p-6">
+          <h2 className="text-xl font-semibold mb-4">Similar Viral Memes</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {viralityData.similarMemes.map((meme, index) => (
+              <div key={index} className="bg-secondary/30 rounded-lg overflow-hidden border border-border">
+                <img 
+                  src={meme} 
+                  alt={`Similar meme ${index + 1}`} 
+                  className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "https://i.imgflip.com/1bij.jpg"; // Fallback image
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ViralityPredictor;

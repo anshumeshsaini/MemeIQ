@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Search, BarChart2 } from 'lucide-react';
+import { Menu, X, Search, BarChart2, Image } from 'lucide-react';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -36,6 +36,9 @@ const Navbar = () => {
             </Link>
             <Link to="/search" className="text-foreground/80 hover:text-foreground transition-colors">
               Search
+            </Link>
+            <Link to="/creator" className="text-foreground/80 hover:text-foreground transition-colors">
+              Create
             </Link>
             <Link to="/trends" className="text-foreground/80 hover:text-foreground transition-colors">
               Trends
@@ -77,6 +80,13 @@ const Navbar = () => {
               onClick={toggleMenu}
             >
               Search
+            </Link>
+            <Link
+              to="/creator"
+              className="block px-3 py-2 text-foreground/90 hover:bg-secondary rounded-md"
+              onClick={toggleMenu}
+            >
+              Create
             </Link>
             <Link
               to="/trends"
